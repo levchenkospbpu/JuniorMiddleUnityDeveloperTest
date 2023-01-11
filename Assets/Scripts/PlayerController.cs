@@ -5,6 +5,9 @@ public class PlayerController : MonoBehaviour
 {
     [field: SerializeField] public float MaxSpeed { get; private set; }
 
+    [SerializeField] private float turnSmoothTime;
+    private float turnSmoothVelocity;
+
     private Controls _controls;
     private InputAction _move;
 
@@ -48,12 +51,14 @@ public class PlayerController : MonoBehaviour
 
     private void LookAt()
     {
-        Vector3 direction = _rb.velocity;
+        Vector3 direction = _rb.velocity.normalized;
         direction.y = 0;
 
         if (_move.ReadValue<Vector2>().sqrMagnitude > 0 && direction.sqrMagnitude > 0)
         {
-            _rb.rotation = Quaternion.LookRotation(direction, Vector3.up);
+            float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
+            float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
+            transform.rotation = Quaternion.Euler(0f, angle, 0f);
         }
         else
         {
