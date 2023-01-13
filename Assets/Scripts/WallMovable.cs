@@ -3,72 +3,87 @@ using UnityEngine;
 
 public class WallMovable : MonoBehaviour
 {
-	public bool isDown = true;
-	public bool isRandom = true;
-	public float speed = 2f;
+	[SerializeField] private bool _isRandom = true;
+	[SerializeField] private float _speed = 2f;
 
-	private float height;
-	private float posYDown;
-	private bool isWaiting = false;
-	private bool canChange = true;
+	private bool _isDown = false;
+	private float _height;
+	private float _posYDown;
+	private bool _isWaiting = false;
+	private bool _canChange = true;
 
 	void Awake()
     {
-		height = transform.localScale.y;
-		if(isDown)
-			posYDown = transform.position.y;
+		_height = transform.localScale.y;
+		if (_isDown)
+		{
+			_posYDown = transform.position.y;
+		}
 		else
-			posYDown = transform.position.y - height;
+		{
+			_posYDown = transform.position.y - _height;
+		}
 	}
 
     void Update()
     {
-		if (isDown)
+		if (_isDown)
 		{
-			if (transform.position.y < posYDown + height)
+			if (transform.position.y < _posYDown + _height)
 			{
-				transform.position += Vector3.up * Time.deltaTime * speed;
+				transform.position += Vector3.up * Time.deltaTime * _speed;
 			}
-			else if (!isWaiting)
+			else if (!_isWaiting)
+            {
 				StartCoroutine(WaitToChange(1f));
+			}
 		}
 		else
 		{
-			if (!canChange)
-				return;
-
-			if (transform.position.y > posYDown)
+			if (!_canChange)
 			{
-				transform.position -= Vector3.up * Time.deltaTime * speed;
+				return;
 			}
-			else if (!isWaiting)
+			if (transform.position.y > _posYDown)
+			{
+				transform.position -= Vector3.up * Time.deltaTime * _speed;
+			}
+			else if (!_isWaiting)
+            {
 				StartCoroutine(WaitToChange(1f));
+			}
 		}
 	}
 
 	IEnumerator WaitToChange(float time)
 	{
-		isWaiting = true;
+		_isWaiting = true;
 		yield return new WaitForSeconds(time);
-		isWaiting = false;
-		isDown = !isDown;
+		_isWaiting = false;
+		_isDown = !_isDown;
 
-		if (isRandom && !isDown)
+		if (_isRandom && !_isDown)
 		{
 			int num = Random.Range(0, 2);
 			if (num == 1)
+            {
 				StartCoroutine(Retry(1.5f));
+			}
 		}
 	}
 
 	IEnumerator Retry(float time)
 	{
-		canChange = false;
+		_canChange = false;
 		yield return new WaitForSeconds(time);
 		int num = Random.Range(0, 2);
 		if (num == 1)
+        {
 			StartCoroutine(Retry(1.25f));
+		}
 		else
-			canChange = true;
+        {
+			_canChange = true;
+		}
 	}
 }
